@@ -1,10 +1,59 @@
 import logging
+import numpy as np
 import os
+import pandas as pd
 import sqlite3
 
 root_path = os.path.dirname(os.path.realpath(__file__))
 runlog = logging.getLogger('runlog')
 alglog = logging.getLogger('alglog')
+
+
+def production_monthyear(file):
+    """
+    Reads the production data from the month (column) by year (row) data into a dataframe.
+    :param file: File location
+    :type file: str
+    :return: Production Data Table
+    :rtype: dataframe
+    """
+    runlog.info('READ: Production data table from file: {0}.'.format(file))
+    try:
+        df = pd.read_csv(file, delimiter=',', header=0, dtype=np.float64,
+                         names=['Year', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+                                'September', 'October', 'November', 'December', 'Total'])
+    except FileNotFoundError:
+        runlog.error('READ: File {0} does not exist'.format(file))
+        raise FileNotFoundError('File {0} does not exist'.format(file))
+    return df
+
+
+def production_by_month(dataframe=None, file=None):
+    """
+    Converts datafrom table
+    :param dataframe: Production Dataframe
+    :type dataframe: dataframe
+    :param file: File location
+    :type file: str
+    :return: Production data by month
+    :rtype: numpy.array
+    """
+
+    if not isinstance(dataframe, pd.DataFrame) and file is None:
+        runlog.error('READ: Missing args')
+        raise ValueError('READ: Missing args.')
+
+    if not isinstance(dataframe, pd.DataFrame) or dataframe.empty:
+        dataframe = production_monthyear(file)
+
+    year = list()
+    production = list()
+    for y in range(0, len(dataframe.Year)):
+        for m in range(1, 13):
+            year.append(dataframe.iloc[y][0] + m / 12)
+            production.append(dataframe.iloc[y][m])
+
+    return np.array([year, production])
 
 
 def read_file(file):
