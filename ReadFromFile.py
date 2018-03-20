@@ -9,6 +9,15 @@ runlog = logging.getLogger('runlog')
 alglog = logging.getLogger('alglog')
 
 
+def drillinginfo(file):
+    """
+    Reads the production data file in the drillinginfo.com format.
+    :param file:
+    :return: production
+    """
+    runlog.info('READ: Production data from drillinginfo.com from file: {0}'.format(file))
+
+
 def production_monthyear(file):
     """
     Reads the production data from the month (column) by year (row) data into a dataframe.
